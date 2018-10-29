@@ -246,10 +246,15 @@ function collision() {
 	player.setPosition();
 }
 
-placesObjects();
-findObjects();
-setInterval(gravity, 10);
-setInterval(moveEnemy,10);
-player.setPosition();
+function init() {
+	placesObjects();
+	findObjects();
+	setInterval(gravity, 10);
+	setInterval(moveEnemy,10);
+	player.setPosition();
+	
+	document.addEventListener("keydown", move);
+}
 
-document.addEventListener("keydown", move);
+init();
+
