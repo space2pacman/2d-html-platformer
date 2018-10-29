@@ -30,16 +30,22 @@ function wrap(el, wrapper) {
     wrapper.appendChild(el);
 }
 
+function getElIndex(el) {
+    for (var i = 0; el = el.previousElementSibling; i++);
+    return i;
+}
+
 objects.addEventListener("click", function() {
 	if (event.target.className == this.className || event.target.className == "object") return;
     event.stopPropagation();
     object = event.target.className;
-})
+});
 
 walls.addEventListener("click", function(event){
 	if (event.target.className == this.className) return;
     event.stopPropagation();
     event.target.className = object;
+    console.log(getElIndex(event.target))
 });
 
 function placesObjects() {

@@ -1,0 +1,27 @@
+Platformer
+
+1) Три уровня по 3-м тематикам. HTML/CSS/JS
+
+HTML LEVEL 01
+1 - wall (<div>)
+2 - money (Chrome)
+3 - needles ()
+5 - enemy (IE)
+7 - finish ()
+
+HTML LEVEL 02
+1 - wall (<div>)
+2 - money (Chrome)
+3 - needles ()
+5 - enemy (Amigo)
+7 - finish ()
+
+HTML LEVEL 03
+1 - wall (<div>)
+2 - money (Chrome)
+3 - needles ()
+5 - enemy (Flash)
+7 - finish ()
+
+CSS (bootstrap, BEM, display: block, SVG, Adobe Muse)
+JS (Gulp, Webpack, Jquery, VUE.JS)
