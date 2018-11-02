@@ -1,5 +1,7 @@
-var walls = document.querySelector(".walls");
-var field = document.querySelector(".field");
+var doc = document;
+var objects = doc.querySelector(".objects");
+var room = doc.querySelector(".room");
+var field = doc.querySelector(".field");
 var template = {
 	wall: "<div class='wall'></div>",
 	empty: "<div class='empty'></div>",
@@ -26,82 +28,137 @@ var player = {
 	step: {
 		walk: 10,
 		jump: 20,
-		gravity: 2
+		gravity: 2,
+		speed: 10
 	},
 	jumpHeight: 0,
 	jumpMaxHeight: 10,
 	setPosition: function() {
-		player.el.style.left = player.x + "px";
-		player.el.style.top = player.y + "px";
+		this.el.style.left = this.x + "px";
+		this.el.style.top = this.y + "px";
+	},
+	checkPosition: function() {
+		if(player.el.offsetLeft > field.offsetWidth / 2) {
+			world.move = true;
+		} else {
+			world.move = false;
+		}
+	},
+	move: function(direction) {
+		if(direction == "left") this.x -= this.step.walk;
+		if(direction == "right") this.x += this.step.walk;
 	}
 };
+var arrow = {
+	up: 38,
+	left: 37,
+	right: 39
+}
 var enemy = {
 	el: null,
 	x: [],
 	y: [],
 	resolution: []
 };
-/*
-0 - empty
-1 - wall
-2 - money
-3 - needles
-4 - player
-5 - enemy
-6 - obstacle
-7 - finish
-*/
+var id = {
+	empty: 0,
+	wall: 1,
+	money: 2,
+	needles: 3,
+	player: 4,
+	enemy: 5,
+	obstacle: 6,
+	finish: 7
+}
+var world = {
+	step: 0,
+	move: false,
+	speed: 10
+}
 var map = [
-	[0,0,1,1,0,0,0,0,0,0],
-	[0,0,0,1,0,0,0,0,0,0],
-	[0,0,0,1,0,0,0,0,0,0],
-	[4,0,1,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,6,5,0,0,6,0,0,0],
-	[0,0,6,0,0,5,6,0,0,0],
-	[0,0,1,1,1,1,1,0,0,0],
-	[0,1,0,7,0,0,2,0,3,0]
+	[0,0,1,1,0,0,0,0,0,0,0,1],
+	[0,0,0,1,0,0,0,0,0,0,0,1],
+	[0,0,0,1,0,0,0,0,0,0,0,1],
+	[4,0,1,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,6,0,0,0,6,0,0,0,0,0],
+	[0,0,6,0,0,0,6,0,0,0,0,0],
+	[0,0,1,1,1,1,1,0,0,0,0,0],
+	[0,1,0,7,0,0,2,0,3,0,0,0]
 ];
 
+function placesPlayer() {
+	room.innerHTML = "";
+
+	for (var i = 0; i < map.length; i++) {
+		for(var j = 0; j < map[i].length; j++) {
+			if(map[i][j] == id.player) {
+				room.innerHTML += template.player;
+				objects.innerHTML += template.empty;
+				player.x = j * size.w;
+				player.y = i * size.h;
+			}
+		}
+	}
+}
+
 function placesObjects() {
-	walls.innerHTML = "";
+	objects.innerHTML = "";
 
 	for (var i = 0; i < map.length; i++) {
 		for(var j = 0; j < map[i].length; j++) {
 			switch(map[i][j]) {
-				case 0:
-					walls.innerHTML += template.empty;
+				case id.empty:
+					objects.innerHTML += template.empty;
 					break;
-				case 1:
-					walls.innerHTML += template.wall;
+				case id.wall:
+					objects.innerHTML += template.wall;
 					break;
-				case 2:
-					walls.innerHTML += template.money;
+				case id.money:
+					objects.innerHTML += template.money;
 					break;
-				case 3:
-					walls.innerHTML += template.needles;
+				case id.needles:
+					objects.innerHTML += template.needles;
 					break;
-				case 4:
-					walls.innerHTML += template.player;
-					walls.innerHTML += template.empty;
-					player.x = j * size.w;
-					player.y = i * size.h;
+				case id.player:
+					placesPlayer();
 					break;
-				case 5:
-					walls.innerHTML += template.enemy;
-					walls.innerHTML += template.empty;
+				case id.enemy:
+					objects.innerHTML += template.enemy;
+					objects.innerHTML += template.empty;
 					enemy.x.push(j * size.w);
 					enemy.y.push(i * size.h);
 					enemy.resolution.push(true)
 					break;
-				case 6:
-					walls.innerHTML += template.obstacle;
+				case id.obstacle:
+					objects.innerHTML += template.obstacle;
 					break;
-				case 7:
-					walls.innerHTML += template.finish;
+				case id.finish:
+					objects.innerHTML += template.finish;
 					break;
 			}
+		}
+	}
+}
+
+function findObjects() {
+	wall = doc.querySelectorAll(".wall");
+	money = doc.querySelectorAll(".money");
+	needles = doc.querySelectorAll(".needles");
+	player.el = doc.querySelector(".player");
+	finish = doc.querySelector(".finish");
+	enemy.el = doc.querySelectorAll(".enemy");
+	obstacle = doc.querySelectorAll(".obstacle");
+}
+
+function switchResolution(index, resulution) {
+	for(var i = 0; i < obstacle.length; i++) {
+		if(enemy.x[index] + enemy.el[index].offsetWidth == obstacle[i].offsetLeft + obstacle[i].offsetWidth
+			&& enemy.x[index] == obstacle[i].offsetLeft
+			&& enemy.y[index] + enemy.el[index].offsetHeight == obstacle[i].offsetTop + obstacle[i].offsetHeight
+			&& enemy.y[index] == obstacle[i].offsetTop) {
+			enemy.resolution[index] = resulution;
 		}
 	}
 }
@@ -110,29 +167,12 @@ function moveEnemy() {
 	for(var i = 0;i < enemy.el.length; i++) {
 		if(enemy.resolution[i]) {
 			enemy.x[i]++;
-
-			for(var  j = 0; j < obstacle.length; j++) {
-
-				if(enemy.x[i] + enemy.el[i].offsetWidth == obstacle[j].offsetLeft + obstacle[j].offsetWidth
-					&& enemy.x[i] == obstacle[j].offsetLeft
-					&& enemy.y[i] + enemy.el[i].offsetHeight == obstacle[j].offsetTop + obstacle[j].offsetHeight
-					&& enemy.y[i] == obstacle[j].offsetTop) {
-					enemy.resolution[i] = false;
-				}
-			}
+			switchResolution(i, false);
 		}
 		
 		if(!enemy.resolution[i]) {
 			enemy.x[i]--;
-
-			for(var j = 0; j < obstacle.length; j++) {
-				if(enemy.x[i] + enemy.el[i].offsetWidth == obstacle[j].offsetLeft + obstacle[j].offsetWidth
-					&& enemy.x[i] == obstacle[j].offsetLeft
-					&& enemy.y[i] + enemy.el[i].offsetHeight == obstacle[j].offsetTop + obstacle[j].offsetHeight
-					&& enemy.y[i] == obstacle[j].offsetTop) {
-					enemy.resolution[i] = true;
-				}
-			}
+			switchResolution(i, true);
 		}
 
 		enemy.el[i].style.left = enemy.x[i] + "px";
@@ -140,28 +180,20 @@ function moveEnemy() {
 	}
 }
 
-function findObjects() {
-	wall = document.querySelectorAll(".wall");
-	money = document.querySelectorAll(".money");
-	needles = document.querySelectorAll(".needles");
-	player.el = document.querySelector(".player");
-	finish = document.querySelector(".finish");
-	enemy.el = document.querySelectorAll(".enemy");
-	obstacle = document.querySelectorAll(".obstacle");
-}
-
 function move(e) {
 	switch(e.keyCode) {
-		case 38:
+		case arrow.up:
 			jump();
 			break;
-		case 37:
-			player.x -= player.step.walk;
+		case arrow.left:
+			moveWorld("left");
 			break;
-		case 39:
-			player.x += player.step.walk;
+		case arrow.right:
+			moveWorld("right");
 			break;
 	}
+
+	player.checkPosition();
 	collision();
 }
 
@@ -173,7 +205,7 @@ function jump() {
 			player.jumpHeight = 0;
 			clearInterval(i);
 		}
-	}, 10);
+	}, jump.speed);
 }
 
 function gravity() {
@@ -182,24 +214,47 @@ function gravity() {
 }
 
 function gameover() {
-	placesObjects();
+	placesPlayer();
 	findObjects();
 	player.x = 0;
 	player.y = 0;
 	player.setPosition();
 }
 
-function collision() {
-	for(var i = 0; i < wall.length; i++) {
-		if (player.x + player.el.offsetWidth > wall[i].offsetLeft
-			&& player.x < wall[i].offsetLeft + wall[i].offsetWidth
-			&& player.y + player.el.offsetHeight > wall[i].offsetTop
-			&& player.y < wall[i].offsetTop + wall[i].offsetHeight) {
-			player.x = player.el.offsetLeft;
-			player.y = player.el.offsetTop;
+function checkCollision(object, action) {
+	for(var i = 0; i < object.length; i++) {
+		if(player.x - world.step + player.el.offsetWidth > object[i].offsetLeft
+			&& player.x - world.step < object[i].offsetLeft + object[i].offsetWidth
+			&& player.y + player.el.offsetHeight > object[i].offsetTop
+			&& player.y < object[i].offsetTop + object[i].offsetHeight) {
+			action(i);
 		}
 	}
+}
 
+function moveWorld(direction) {
+	var index;
+
+	if(direction == "right") index = -1;
+	if(direction == "left") index = 1;
+
+	if(world.move && world.step <= 0) {
+		world.step += player.step.walk * index;
+		objects.style.left = world.step + "px";
+	} else {
+		player.move(direction);
+		world.step = 0;
+	}
+
+	if(world.step > 0) {
+		world.step = 0;
+		world.move = false;
+		objects.style.left = world.step + "px";
+		player.move(direction);
+	}
+}
+
+function collision() {
 	if (player.x + player.el.offsetWidth > field.offsetWidth
 			|| player.y + player.el.offsetHeight >= field.offsetHeight
 			|| player.x < 0
@@ -215,46 +270,31 @@ function collision() {
 		console.log(true)
 	}
 
-	for(var i = 0; i < money.length; i++) {
-		if(player.x + player.el.offsetWidth > money[i].offsetLeft
-			&& player.x < money[i].offsetLeft + money[i].offsetWidth
-			&& player.y + player.el.offsetHeight > money[i].offsetTop
-			&& player.y < money[i].offsetTop + money[i].offsetHeight) {
-			money[i].classList.add("empty");
-			money[i].classList.remove("money");
-		}
-	}
+	checkCollision(wall, function() {
+		//////////////////////////////////
+		//world.move = false;
+		//console.log(world.move)
+		player.x = player.el.offsetLeft;
+		player.y = player.el.offsetTop;
+	})
 
-	for(var i = 0; i < needles.length; i++) {
-		if(player.x + player.el.offsetWidth > needles[i].offsetLeft
-			&& player.x < needles[i].offsetLeft + needles[i].offsetWidth
-			&& player.y + player.el.offsetHeight > needles[i].offsetTop
-			&& player.y < needles[i].offsetTop + needles[i].offsetHeight) {
-			gameover();
-		}
-	}
+	checkCollision(money, function(index) {
+		money[index].classList.add("empty");
+		money[index].classList.remove("money");
+	})
 
-	for(var i = 0; i < enemy.el.length; i++) {
-		if(player.x + player.el.offsetWidth > enemy.el[i].offsetLeft
-			&& player.x < enemy.el[i].offsetLeft + enemy.el[i].offsetWidth
-			&& player.y + player.el.offsetHeight > enemy.el[i].offsetTop
-			&& player.y < enemy.el[i].offsetTop + enemy.el[i].offsetHeight) {
-			gameover();
-		}
-	}
-
+	checkCollision(needles, gameover);
+	checkCollision(enemy.el, gameover);
 	player.setPosition();
 }
 
 function init() {
 	placesObjects();
 	findObjects();
-	setInterval(gravity, 10);
-	setInterval(moveEnemy,10);
+	setInterval(gravity, world.speed);
+	setInterval(moveEnemy, world.speed);
 	player.setPosition();
-	
-	document.addEventListener("keydown", move);
+	doc.addEventListener("keydown", move);
 }
 
 init();
-
