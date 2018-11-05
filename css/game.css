@@ -1,0 +1,93 @@
+body {
+	margin: 0;
+	overflow: hidden;
+}
+
+.field {
+	width: 500px;
+	height: 500px;
+	border: 1px solid;
+	margin: 50px auto;
+	position: relative;
+	overflow: hidden;
+}
+
+.objects {
+	height: inherit;
+	display: flex;
+	flex-wrap: wrap;
+	position: relative;
+	background-image: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url(https://s3.amazonaws.com/gameartpartnersimagehost/wp-content/uploads/2017/12/Flat_Game_Background_1.jpg);
+    background-size: cover;
+}
+
+.wall, .empty, .money, .player, .enemy, .obstacle, .needles, .finish, .water {
+	width: 50px;
+	height: 50px;
+	background-size: cover;
+}
+
+.wall {
+    background-image: url(../img/wall.png);
+}
+
+.money {
+	background: yellow;
+	border-radius: 50%;
+}
+
+.needles {
+	height: 10px;
+	position: relative;
+	top: 40px;
+	background-image: url(../img/platformPack_tile043.png);
+	background-size: 25%;
+	background-position: 0px -20px;
+}
+
+.player {
+	background-image: url(../img/platformChar_walk1.png);
+	position: absolute;
+}
+
+.enemy {
+	background-image: url(../img/bee.png);
+	position: absolute;
+}
+
+.finish {
+	background: orange;
+}
+
+.surface {
+    background-image: url(../img/surface.png);
+}
+
+.water {
+	background-image: url(../img/water.png);
+    z-index: 1;
+    opacity: 0.75;
+}
+
+.objects__ {
+	position: absolute;
+    top: -10px;
+    right: -85px;
+    padding: 10px;
+}
+
+.object__ {
+	border: 1px solid rgba(0, 161, 255, 0.5);
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+.right {
+	transform: rotateY(180deg);
+}
+
+.left {
+	transform: rotateY(0deg);
+}

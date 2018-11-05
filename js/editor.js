@@ -35,13 +35,13 @@ function getElIndex(el) {
     return i;
 }
 
-objects.addEventListener("click", function() {
+/*objects.addEventListener("click", function() {
 	if (event.target.className == this.className || event.target.className == "object") return;
     event.stopPropagation();
     object = event.target.className;
-});
+});*/
 
-walls.addEventListener("click", function(event){
+objects.addEventListener("click", function(event){
 	if (event.target.className == this.className) return;
     event.stopPropagation();
     event.target.className = object;
@@ -49,12 +49,12 @@ walls.addEventListener("click", function(event){
 });
 
 function placesObjects() {
-	walls.innerHTML = "";
+	objects.innerHTML = "";
 
 	for (var i = 0; i < map.length; i++) {
 		for(var j = 0; j < map[i].length; j++) {
 			if(map[i][j] == 0) {
-				walls.innerHTML += template.empty;
+				objects.innerHTML += template.empty;
 			}
 		}
 	}
