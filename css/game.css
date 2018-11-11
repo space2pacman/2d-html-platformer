@@ -3,6 +3,20 @@ body {
 	overflow: hidden;
 }
 
+.wall,
+.empty,
+.money,
+.player,
+.enemy,
+.obstacle,
+.needles,
+.finish,
+.water {
+	width: 50px;
+	height: 50px;
+	background-size: cover;
+}
+
 .field {
 	width: 500px;
 	height: 500px;
@@ -21,15 +35,23 @@ body {
     background-size: cover;
 }
 
-.wall, .empty, .money, .player, .enemy, .obstacle, .needles, .finish, .water {
-	width: 50px;
-	height: 50px;
-	background-size: cover;
+/***** WALL *****/
+.wall {
+    background-image: url(../img/wall-default.png);
 }
 
-.wall {
-    background-image: url(../img/wall.png);
+.wall-surface {
+    background-image: url(../img/wall-surface.png);
 }
+
+.wall-stone {
+    background-image: url(../img/wall-stone.png);
+}
+
+.wall-box {
+    background-image: url(../img/wall-box.png);
+}
+/***** /WALL *****/
 
 .money {
 	background: yellow;
@@ -40,18 +62,39 @@ body {
 	height: 10px;
 	position: relative;
 	top: 40px;
-	background-image: url(../img/platformPack_tile043.png);
+	background-image: url(../img/needles.png);
 	background-size: 25%;
 	background-position: 0px -20px;
 }
 
 .player {
-	background-image: url(../img/platformChar_walk1.png);
+	background-image: url(../img/player.png);
 	position: absolute;
+	background-size: 125%;
+    background-position: -6px -12px;
 }
 
+/***** ENEMY *****/
 .enemy {
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	position: absolute;
+}
+.bee {
 	background-image: url(../img/bee.png);
+}
+
+.bat {
+	background-image: url(../img/bat.png);
+}
+
+.fish {
+	background-image: url(../img/fish.png);
+}
+/***** /ENEMY *****/
+
+.obstacle {
 	position: absolute;
 }
 
@@ -59,15 +102,19 @@ body {
 	background: orange;
 }
 
-.surface {
-    background-image: url(../img/surface.png);
-}
-
+/***** WATER ****/
 .water {
-	background-image: url(../img/water.png);
+	background-image: url(../img/water-default.png);
     z-index: 1;
     opacity: 0.75;
 }
+
+.water-surface {
+	background-image: url(../img/water-surface.png);
+    z-index: 1;
+    opacity: 0.75;
+}
+/***** /WATER *****/
 
 .objects__ {
 	position: absolute;
