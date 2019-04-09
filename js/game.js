@@ -157,7 +157,7 @@ var player = {
 	},
 	gravity: function() {
 		player.y += player.step.gravity;
-		collision();
+		world.collision();
 	}
 };
 
@@ -225,7 +225,7 @@ var world = {
 			this.x += player.step.walk * player.step.speed * index;
 			objects.el.style.left = this.x + "px";
 
-			checkCollision(wall, function() {
+			this.checkCollision(wall, function() {
 				this.x -= player.step.walk * player.step.speed * index;
 				objects.el.style.left = this.x + "px";
 			}.bind(this))	
@@ -237,6 +237,44 @@ var world = {
 			player.move(direction);
 			this.reset();
 		};
+	},
+	checkCollision: function(object, action, range = 0) {
+		for(var i = 0; i < object.length; i++) {
+			if(player.x - world.x + player.el.offsetWidth > object[i].offsetLeft
+				&& player.x - world.x < object[i].offsetLeft + object[i].offsetWidth
+				&& player.y + player.el.offsetHeight > object[i].offsetTop + range
+				&& player.y < object[i].offsetTop + object[i].offsetHeight) {
+				action(i);
+			};
+		};
+	},
+	collision: function() {
+		if (player.x + player.el.offsetWidth > field.offsetWidth
+				|| player.y + player.el.offsetHeight >= field.offsetHeight
+				|| player.x < 0
+				|| player.y < 0) {
+			player.freeze()
+		};
+
+		world.checkCollision(finish, function() {
+			console.log("finish");
+		});
+
+		world.checkCollision(money, function(index) {
+			money[index].classList.add("empty");
+			money[index].classList.remove("money");
+		});
+
+		player.step.speed = 1;
+		world.checkCollision(water, function() {
+			player.step.speed = 0.5;
+		},player.range);
+
+		world.checkCollision(wall, player.freeze.bind(player));
+		world.checkCollision(needles, game.gameover);
+		world.checkCollision(enemy.el, game.gameover);
+		player.setPosition();
+		player.checkPosition();
 	}
 };
 
@@ -373,7 +411,7 @@ var game = {
 				break;
 		};
 
-		collision();
+		world.collision();
 	},
 	gameover: function() {
 		player.places();
@@ -392,46 +430,6 @@ var game = {
 		world.setWidth();
 		doc.addEventListener("keydown", game.move);
 	}
-};
-
-function checkCollision(object, action, range = 0) {
-	for(var i = 0; i < object.length; i++) {
-		if(player.x - world.x + player.el.offsetWidth > object[i].offsetLeft
-			&& player.x - world.x < object[i].offsetLeft + object[i].offsetWidth
-			&& player.y + player.el.offsetHeight > object[i].offsetTop + range
-			&& player.y < object[i].offsetTop + object[i].offsetHeight) {
-			action(i);
-		};
-	};
-};
-
-function collision() {
-	if (player.x + player.el.offsetWidth > field.offsetWidth
-			|| player.y + player.el.offsetHeight >= field.offsetHeight
-			|| player.x < 0
-			|| player.y < 0) {
-		player.freeze()
-	};
-
-	checkCollision(finish, function() {
-		console.log("finish");
-	});
-
-	checkCollision(money, function(index) {
-		money[index].classList.add("empty");
-		money[index].classList.remove("money");
-	});
-
-	player.step.speed = 1;
-	checkCollision(water, function() {
-		player.step.speed = 0.5;
-	},player.range);
-
-	checkCollision(wall, player.freeze.bind(player));
-	checkCollision(needles, game.gameover);
-	checkCollision(enemy.el, game.gameover);
-	player.setPosition();
-	player.checkPosition();
 };
 
 game.init();

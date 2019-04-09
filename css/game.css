@@ -138,3 +138,31 @@ body {
 .left {
 	transform: rotateY(0deg);
 }
+
+@keyframes bee {
+	0% {
+		background-image: url(../img/bee.png);
+	}
+
+	50% {
+		background-image: url(../img/bee_fly.png);
+	}
+
+	100% {
+		background-image: url(../img/bee.png);
+	}
+}
+
+@keyframes bat {
+	0% {
+		background-image: url(../img/bat.png);
+	}
+
+	50% {
+		background-image: url(../img/bat_fly.png);
+	}
+
+	100% {
+		background-image: url(../img/bat.png);
+	}
+}
