@@ -3,16 +3,19 @@ var room = doc.querySelector(".room");
 var field = doc.querySelector(".field");
 var wall;
 var money;
+var keys;
+var locks;
 var needles;
 var finish;
 var water;
+var level = 0;
 
 var size = {
 	w: 50,
 	h: 50
 };
 
-var key = {
+var buttons = {
 	up: 38,
 	left: 37,
 	right: 39
@@ -32,6 +35,12 @@ var id = {
 		surface: 105
 	},
 	money: 200,
+	keys: {
+		blue: 220,
+		yellow: 221,
+		green: 222,
+		red: 223
+	},
 	obstacle: 300,
 	enemy: {
 		bee: 301,
@@ -40,6 +49,12 @@ var id = {
 	},
 	needles: 400,
 	player: 500,
+	locks: {
+		blue: 650,
+		yellow: 651,
+		green: 652,
+		red: 653
+	}
 };
 
 var template = {
@@ -64,36 +79,80 @@ var template = {
 	water: {
 		default: "water",
 		surface: "water-surface"
+	},
+	keys: {
+		default: "key",
+		blue: "blue",
+		yellow: "yellow",
+		green: "green",
+		red: "red"
+	},
+	locks: {
+		default: "lock",
+		blue: "blue",
+		yellow: "yellow",
+		green: "green",
+		red: "red"
 	}
 };
 
-var map = {
-	length: 24,
-	objects: [
-		[100,100,107,107,100,100,100,100,100,100,100,107,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,107,100,100,100,100,100,100,100,107,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,107,100,100,100,100,100,100,100,107,100,100,100,100,100,100,100,100,100,100,100,100],
-		[500,100,107,107,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,300,100,100,100,300,100,100,100,100,100,100,106,106,106,100,100,100,100,100,100,100,100],
-		[100,100,300,100,100,100,300,100,100,100,100,100,100,103,103,103,105,105,105,105,105,105,105,103],
-		[103,103,103,103,103,103,103,103,105,105,105,105,103,101,101,101,104,104,104,104,104,104,104,101],
-		[101,101,101,101,101,101,101,101,103,103,103,103,101,101,101,101,103,103,103,103,103,103,103,101]
-	],
-	enemies:[
-		[100,100,100,100,300,100,302,100,100,100,300,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,300,301,100,100,100,100,300,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,300,100,100,100,301,100,300,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,300,100,303,100,100,100,300,100],
-		[100,100,100,100,100,100,100,100,300,303,100,300,100,100,100,100,300,100,100,100,100,303,300,100],
-		[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
-	]
-};
+var map = [{
+		objects: [
+			[100,100,107,107,100,100,100,100,100,100,100,107,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,107,100,100,100,100,100,100,100,107,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,107,100,100,100,100,100,100,100,107,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[500,100,107,107,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,107,107,107,107,107,100,100,100,107,100,100,100,100,107,107,107,107,100,107,100,100,100,107,100,100,100,107,100,100,100,107,100,100,100,107,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,107,100,100,100,107,100,100,107,100,107,100,100,107,100,100,100,100,100,107,107,100,107,107,100,100,107,100,107,100,100,107,107,100,100,107,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,107,107,107,107,107,100,100,107,107,107,100,100,107,100,100,100,100,100,107,100,107,100,107,100,100,107,107,107,100,100,107,100,107,100,107,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,106,106,106,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,107,100,100,100,100,100,107,107,100,107,107,100,107,100,100,100,100,100,107,100,100,100,107,100,107,107,100,107,107,100,107,100,100,107,107,100],
+			[100,100,220,100,650,100,100,100,100,100,100,100,100,103,103,103,105,105,105,105,105,105,105,103,105,105,105,105,105,105,103,100,100,100,100,100,107,100,100,100,100,100,107,100,100,100,107,100,100,107,107,107,107,100,107,100,100,100,107,100,107,100,100,100,107,100,107,100,100,100,107,100],
+			[103,103,103,103,103,103,103,103,105,105,105,105,103,101,101,101,104,104,104,104,104,104,104,101,104,104,104,104,104,104,101,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,102],
+			[101,101,101,101,101,101,101,101,103,103,103,103,101,101,101,101,103,103,103,103,103,103,103,101,101,101,101,101,101,101,101,101,103,103,103,103,101,101,101,101,103,103,103,103,103,103,103,101,101,101,101,101,101,101,101,101,103,103,103,103,101,101,101,101,103,103,103,103,103,103,103,101]
+		],
+		enemies:[
+			[100,100,100,100,300,100,302,100,100,100,300,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,300,301,100,100,100,100,300,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,300,100,100,100,301,100,300,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,300,100,303,100,100,100,300,100],
+			[100,100,100,100,100,100,100,100,300,303,100,300,100,100,100,100,300,100,100,100,100,303,300,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+		]
+	},
+	{
+		objects: [
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,106,106,106,100,106,106,106,100,106,106,106,100,106,106,106,100,106,106,106],
+			[100,100,500,100,100,100,220,106,100,650,221,106,100,651,222,106,100,652,223,106,100,653,102,106],
+			[103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103]
+		],
+		enemies: []
+	},
+	{
+		objects: [
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,103,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,100,100,101,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[100,500,100,101,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[103,103,103,101,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+			[101,101,101,101,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+		],
+		enemies: []
+	}
+];
 
 var player = {
 	el: null,
@@ -108,6 +167,10 @@ var player = {
 	range: 50,
 	jumpHeight: 0,
 	jumpMaxHeight: 10,
+	jumpSpeed: 10,
+	items: {
+		keys: []
+	},
 	setPosition: function() {
 		this.el.style.left = this.x + "px";
 		this.el.style.top = this.y + "px";
@@ -121,7 +184,6 @@ var player = {
 		} else {
 			world.freeze = true;
 		};
-		//console.log("p: " + (player.el.offsetLeft + player.el.offsetWidth) + " f " + field.offsetWidth / 2 )
 	},
 	move: function(direction) {
 		if(direction == "left") this.x -= this.step.walk * this.step.speed;
@@ -134,9 +196,9 @@ var player = {
 	places: function() {
 		room.innerHTML = "";
 
-		for (var i = 0; i < map.objects.length; i++) {
-			for(var j = 0; j < map.objects[i].length; j++) {
-				if(map.objects[i][j] == id.player) {
+		for (var i = 0; i < map[level].objects.length; i++) {
+			for(var j = 0; j < map[level].objects[i].length; j++) {
+				if(map[level].objects[i][j] == id.player) {
 					room.appendChild(objects.create(template.player));
 					objects.el.appendChild(objects.create(template.empty));
 					this.x = j * size.w;
@@ -153,7 +215,7 @@ var player = {
 				player.jumpHeight = 0;
 				clearInterval(i);
 			}
-		}, 10);
+		}, player.jumpSpeed);
 	},
 	gravity: function() {
 		player.y += player.step.gravity;
@@ -204,7 +266,7 @@ var world = {
 	freeze: true,
 	speed: 10,
 	setWidth: function() {
-		objects.el.style.width = map.objects[0].length * size.w + "px";
+		objects.el.style.width = map[level].objects[0].length * size.w + "px";
 	},
 	setPosition: function(value) {
 		this.x = value;
@@ -258,12 +320,40 @@ var world = {
 
 		world.checkCollision(finish, function() {
 			console.log("finish");
+			game.nextLevel();
 		});
 
 		world.checkCollision(money, function(index) {
 			money[index].classList.add("empty");
 			money[index].classList.remove("money");
 		});
+
+		world.checkCollision(keys, function(index) {
+			var key = keys[index].getAttribute("data-key");
+
+			if(!player.items.keys.includes(key)) {
+				player.items.keys.push(key);
+			}
+			keys[index].classList.add("empty");
+			keys[index].classList.remove("key");
+			keys[index].classList.remove("key-" + key);
+		})
+
+		world.checkCollision(locks, function(index) {
+			var lock = locks[index].getAttribute("data-lock");
+
+			if(player.items.keys.includes(lock)) {
+				locks[index].classList.add("hide--down");
+				setTimeout(function() {
+					locks[index].classList.add("empty");
+					locks[index].classList.remove("wall");
+					locks[index].classList.remove("lock");
+					locks[index].classList.remove("lock-" + lock);
+					objects.find();
+				}, 1000)
+				player.items.keys.splice(player.items.keys.indexOf(lock),1);
+			}
+		})
 
 		player.step.speed = 1;
 		world.checkCollision(water, function() {
@@ -294,9 +384,9 @@ var objects = {
 	el: doc.querySelector(".objects"),
 	places: function(type) {
 
-		for (var i = 0; i < map[type].length; i++) {
-			for(var j = 0; j < map[type][i].length; j++) {
-				switch(map[type][i][j]) {
+		for (var i = 0; i < map[level][type].length; i++) {
+			for(var j = 0; j < map[level][type][i].length; j++) {
+				switch(map[level][type][i][j]) {
 					case id.empty:
 						objects.el.appendChild(objects.create(template.empty));
 						break;
@@ -313,7 +403,7 @@ var objects = {
 						player.places();
 						break;
 					case id.enemy.bee:
-						var obj = objects.create(template.enemy.default)
+						var obj = objects.create(template.enemy.default);
 						obj.classList.add(template.enemy.bee);
 						objects.el.appendChild(obj);
 						objects.el.appendChild(objects.create(template.empty));
@@ -322,7 +412,7 @@ var objects = {
 						enemy.resolution.push(true);
 						break;
 					case id.enemy.bat:
-						var obj = objects.create(template.enemy.default)
+						var obj = objects.create(template.enemy.default);
 						obj.classList.add(template.enemy.bat);
 						objects.el.appendChild(obj);
 						objects.el.appendChild(objects.create(template.empty));
@@ -331,7 +421,7 @@ var objects = {
 						enemy.resolution.push(true);
 						break;
 					case id.enemy.fish:
-						var obj = objects.create(template.enemy.default)
+						var obj = objects.create(template.enemy.default);
 						obj.classList.add(template.enemy.fish);
 						objects.el.appendChild(obj);
 						objects.el.appendChild(objects.create(template.empty));
@@ -349,17 +439,17 @@ var objects = {
 						objects.el.appendChild(objects.create(template.finish));
 						break;
 					case id.wall.surface:
-						var obj = objects.create(template.wall.default)
+						var obj = objects.create(template.wall.default);
 						obj.classList.add(template.wall.surface);
 						objects.el.appendChild(obj);
 						break;
 					case id.wall.stone:
-						var obj = objects.create(template.wall.default)
+						var obj = objects.create(template.wall.default);
 						obj.classList.add(template.wall.stone);
 						objects.el.appendChild(obj);
 						break;
 					case id.wall.box:
-						var obj = objects.create(template.wall.default)
+						var obj = objects.create(template.wall.default);
 						obj.classList.add(template.wall.box);
 						objects.el.appendChild(obj);
 						break;
@@ -367,8 +457,60 @@ var objects = {
 						objects.el.appendChild(objects.create(template.water.default));
 						break;
 					case id.water.surface:
-						var obj = objects.create(template.water.default)
+						var obj = objects.create(template.water.default);
 						obj.classList.add(template.water.surface);
+						objects.el.appendChild(obj);
+						break;
+					case id.keys.blue:
+						var obj = objects.create(template.keys.default)
+						obj.classList.add(template.keys.default + "-" + template.keys.blue);
+						obj.setAttribute("data-" + template.keys.default, template.keys.blue);
+						objects.el.appendChild(obj);
+						break;
+					case id.keys.yellow:
+						var obj = objects.create(template.keys.default)
+						obj.classList.add(template.keys.default + "-" + template.keys.yellow);
+						obj.setAttribute("data-" + template.keys.default, template.keys.yellow);
+						objects.el.appendChild(obj);
+						break;
+					case id.keys.green:
+						var obj = objects.create(template.keys.default)
+						obj.classList.add(template.keys.default + "-" + template.keys.green);
+						obj.setAttribute("data-" + template.keys.default, template.keys.green);
+						objects.el.appendChild(obj);
+						break;
+					case id.keys.red:
+						var obj = objects.create(template.keys.default)
+						obj.classList.add(template.keys.default + "-" + template.keys.red);
+						obj.setAttribute("data-" + template.keys.default, template.keys.red);
+						objects.el.appendChild(obj);
+						break;
+					case id.locks.blue:
+						var obj = objects.create(template.locks.default)
+						obj.classList.add(template.locks.default + "-" + template.locks.blue);
+						obj.classList.add(template.wall.default);
+						obj.setAttribute("data-" + template.locks.default, template.locks.blue);
+						objects.el.appendChild(obj);
+						break;
+					case id.locks.yellow:
+						var obj = objects.create(template.locks.default)
+						obj.classList.add(template.locks.default + "-" + template.locks.yellow);
+						obj.classList.add(template.wall.default);
+						obj.setAttribute("data-" + template.locks.default, template.locks.yellow);
+						objects.el.appendChild(obj);
+						break;
+					case id.locks.green:
+						var obj = objects.create(template.locks.default)
+						obj.classList.add(template.locks.default + "-" + template.locks.green);
+						obj.classList.add(template.wall.default);
+						obj.setAttribute("data-" + template.locks.default, template.locks.green);
+						objects.el.appendChild(obj);
+						break;
+					case id.locks.red:
+						var obj = objects.create(template.locks.default)
+						obj.classList.add(template.locks.default + "-" + template.locks.red);
+						obj.classList.add(template.wall.default);
+						obj.setAttribute("data-" + template.locks.default, template.locks.red);
 						objects.el.appendChild(obj);
 						break;
 				};
@@ -379,6 +521,8 @@ var objects = {
 		wall = doc.querySelectorAll(".wall");
 		money = doc.querySelectorAll(".money");
 		needles = doc.querySelectorAll(".needles");
+		keys = doc.querySelectorAll(".key");
+		locks = doc.querySelectorAll(".lock");
 		player.el = doc.querySelector(".player");
 		finish = doc.querySelectorAll(".finish");
 		enemy.el = doc.querySelectorAll(".enemy");
@@ -396,15 +540,15 @@ var objects = {
 var game = {
 	move: function(e) {
 		switch(e.keyCode) {
-			case key.up:
+			case buttons.up:
 				player.jump();
 				break;
-			case key.left:
+			case buttons.left:
 				world.move("left");
 				player.el.classList.remove("left")
 				player.el.classList.add("right");
 				break;
-			case key.right:
+			case buttons.right:
 				world.move("right");
 				player.el.classList.remove("right")
 				player.el.classList.add("left");
@@ -419,12 +563,18 @@ var game = {
 		player.setPosition();
 		world.reset();
 	},
+	nextLevel: function() {
+		level++;
+		world.reset();
+		objects.el.innerHTML = "";
+		this.init();
+	},
 	init: function() {
 		objects.places("objects");
 		objects.places("enemies");
 		objects.find();
 		obstacle.places();
-		setInterval(player.gravity, world.speed);
+			setInterval(player.gravity, world.speed);
 		setInterval(enemy.move.bind(enemy), world.speed * enemy.speed);
 		player.setPosition();
 		world.setWidth();

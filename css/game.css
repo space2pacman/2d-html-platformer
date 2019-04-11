@@ -11,6 +11,8 @@ body {
 .obstacle,
 .needles,
 .finish,
+.lock,
+.key,
 .water {
 	width: 50px;
 	height: 50px;
@@ -18,7 +20,7 @@ body {
 }
 
 .field {
-	width: 500px;
+	//width: 500px;
 	height: 500px;
 	border: 1px solid;
 	margin: 50px auto;
@@ -31,7 +33,7 @@ body {
 	display: flex;
 	flex-wrap: wrap;
 	position: relative;
-	background-image: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url(https://s3.amazonaws.com/gameartpartnersimagehost/wp-content/uploads/2017/12/Flat_Game_Background_1.jpg);
+	background-image: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url(../img/background.jpg);
     background-size: cover;
 }
 
@@ -42,6 +44,8 @@ body {
 
 .wall-surface {
     background-image: url(../img/wall-surface.png);
+    top: 1px;
+    transition: all, 1s;
 }
 
 .wall-stone {
@@ -59,12 +63,11 @@ body {
 }
 
 .needles {
-	height: 10px;
-	position: relative;
-	top: 40px;
-	background-image: url(../img/needles.png);
-	background-size: 25%;
-	background-position: 0px -20px;
+    height: 25px;
+    position: relative;
+    top: 25px;
+    background-image: url(../img/needles.png);
+    background-position: 0px -24px;
 }
 
 .player {
@@ -83,10 +86,12 @@ body {
 }
 .bee {
 	background-image: url(../img/bee.png);
+	animation: jump .5s infinite;
 }
 
 .bat {
 	background-image: url(../img/bat.png);
+	animation: jump .5s infinite;
 }
 
 .fish {
@@ -116,6 +121,40 @@ body {
 }
 /***** /WATER *****/
 
+/***** KEY ******/
+.key-blue {
+	background-image: url(../img/key-blue.png);
+}
+.key-yellow {
+	background-image: url(../img/key-yellow.png);
+}
+.key-green {
+	background-image: url(../img/key-green.png);
+}
+.key-red {
+	background-image: url(../img/key-red.png);
+}
+/***** /KEY *****/
+
+/***** LOCK ******/
+.lock {
+	transition: all, 1s;
+	top: 1px;
+}
+.lock-blue {
+	background-image: url(../img/lock-blue.png);
+}
+.lock-yellow {
+	background-image: url(../img/lock-yellow.png);
+}
+.lock-green {
+	background-image: url(../img/lock-green.png);
+}
+.lock-red {
+	background-image: url(../img/lock-red.png);
+}
+/***** /LOCK *****/
+
 .objects__ {
 	position: absolute;
     top: -10px;
@@ -139,30 +178,36 @@ body {
 	transform: rotateY(0deg);
 }
 
-@keyframes bee {
+@keyframes jump {
 	0% {
-		background-image: url(../img/bee.png);
+		margin-top: 0px;
 	}
 
 	50% {
-		background-image: url(../img/bee_fly.png);
+		margin-top: 10px;
 	}
 
 	100% {
-		background-image: url(../img/bee.png);
+		margin-top: 0px;
 	}
 }
 
-@keyframes bat {
+@keyframes water {
 	0% {
-		background-image: url(../img/bat.png);
+		transform: rotateY(0deg);
 	}
 
 	50% {
-		background-image: url(../img/bat_fly.png);
+		transform: rotateY(30deg);
 	}
 
 	100% {
-		background-image: url(../img/bat.png);
+		transform: rotateY(0deg);
 	}
+}
+
+.hide--down {
+	position: relative;
+	height: 0px;
+	top: 50px;
 }
