@@ -1,3 +1,16 @@
+/*
+Процесс добавления новых объектов
+0) Переменная для последующего поиска всех элементов
+1) Добалвение id в объект id
+2) Добавление название класса в объект template
+3) Добавление на карту id в объект map
+4) Добавление в objects.places в switch свой case с id и кодом добавления элемента
+5) Добавление в objects.find querySelectorAll'a
+6) Добавление в world.collision -> world.checkCollision(элементы, callback с index'ом для каждого элемента)
+
+Если нужна коллизия при движении world'a чтобы персонаж останавливался нужно писать условие в world.move -> this.checkCollision()
+*/
+
 var doc = document;
 var room = doc.querySelector(".room");
 var field = doc.querySelector(".field");
@@ -210,7 +223,7 @@ var player = {
 	jump: function() {
 		var i = setInterval(function() {
 			player.y -= player.step.jump;
-			player.jumpHeight++
+			player.jumpHeight++;
 			if (player.jumpHeight == player.jumpMaxHeight) {
 				player.jumpHeight = 0;
 				clearInterval(i);
@@ -261,6 +274,28 @@ var enemy = {
 	}
 };
 
+var locks = {
+	el: null,
+	hide: function(index) {
+		locks.el[index].classList.add("hide--down");
+	},
+	collision: function(index) {
+		var lock = locks.el[index].getAttribute("data-lock");
+
+		if(player.items.keys.includes(lock)) {
+			locks.hide(index);
+			setTimeout(function() {
+				locks.el[index].classList.add("empty");
+				locks.el[index].classList.remove("wall");
+				locks.el[index].classList.remove("lock");
+				locks.el[index].classList.remove("lock-" + lock);
+				objects.find();
+			}, 1000);
+			player.items.keys.splice(player.items.keys.indexOf(lock),1);
+		}
+	}
+}
+
 var world = {
 	x: 0,
 	freeze: true,
@@ -278,35 +313,24 @@ var world = {
 		objects.el.style.left = this.x + "px";
 	},
 	move: function(direction) {
-		var index;
+		var delta;
+		var i;
 
-		if(direction == "right") index = -1;
-		if(direction == "left") index = 1;
+		if(direction == "right") delta = -1;
+		if(direction == "left") delta = 1;
 
 		if(!this.freeze && this.x <= 0) {
-			this.x += player.step.walk * player.step.speed * index;
+			this.x += player.step.walk * player.step.speed * delta;
 			objects.el.style.left = this.x + "px";
-
-			this.checkCollision(wall, function(i) {  
-				this.x -= player.step.walk * player.step.speed * index;
+			// Из-за архитектуры игры нужно две коллизии. Когда игрок ходит или когда мир движется
+			this.checkCollision(wall, function(index) {  
+				this.x -= player.step.walk * player.step.speed * delta;
 				objects.el.style.left = this.x + "px";
-				/////////////////////////////
-				if(wall[i].classList.contains("lock")) {
-					var lock = wall[i].getAttribute("data-lock");
 
-					if(player.items.keys.includes(lock)) {
-						wall[i].classList.add("hide--down");
-						setTimeout(function() {
-							wall[i].classList.add("empty");
-							wall[i].classList.remove("wall");
-							wall[i].classList.remove("lock");
-							wall[i].classList.remove("lock-" + lock);
-							objects.find();
-						}, 1000)
-						player.items.keys.splice(player.items.keys.indexOf(lock),1);
-					}
+				if(wall[index].classList.contains("lock")) {
+					locks.el.each((el,number) => { if(el == wall[index]) i = number; })
+					locks.collision(i);
 				}
-				/////////////////////////////
 			}.bind(this));
 		} else {
 			player.move(direction);
@@ -332,7 +356,7 @@ var world = {
 				|| player.y + player.el.offsetHeight >= field.offsetHeight
 				|| player.x < 0
 				|| player.y < 0) {
-			player.freeze()
+			player.freeze();
 		};
 
 		world.checkCollision(finish, function() {
@@ -354,24 +378,9 @@ var world = {
 			keys[index].classList.add("empty");
 			keys[index].classList.remove("key");
 			keys[index].classList.remove("key-" + key);
-		})
+		});
 
-		world.checkCollision(locks, function(index) {
-			var lock = locks[index].getAttribute("data-lock");
-			console.log("lock")
-
-			if(player.items.keys.includes(lock)) {
-				locks[index].classList.add("hide--down");
-				setTimeout(function() {
-					locks[index].classList.add("empty");
-					locks[index].classList.remove("wall");
-					locks[index].classList.remove("lock");
-					locks[index].classList.remove("lock-" + lock);
-					objects.find();
-				}, 1000)
-				player.items.keys.splice(player.items.keys.indexOf(lock),1);
-			}
-		})
+		world.checkCollision(locks.el, locks.collision);
 
 		player.step.speed = 1;
 		world.checkCollision(water, function() {
@@ -401,6 +410,7 @@ var obstacle = {
 var objects = {
 	el: doc.querySelector(".objects"),
 	places: function(type) {
+		var obj;
 
 		for (var i = 0; i < map[level][type].length; i++) {
 			for(var j = 0; j < map[level][type][i].length; j++) {
@@ -421,7 +431,7 @@ var objects = {
 						player.places();
 						break;
 					case id.enemy.bee:
-						var obj = objects.create(template.enemy.default);
+						obj = objects.create(template.enemy.default);
 						obj.classList.add(template.enemy.bee);
 						objects.el.appendChild(obj);
 						objects.el.appendChild(objects.create(template.empty));
@@ -430,7 +440,7 @@ var objects = {
 						enemy.resolution.push(true);
 						break;
 					case id.enemy.bat:
-						var obj = objects.create(template.enemy.default);
+						obj = objects.create(template.enemy.default);
 						obj.classList.add(template.enemy.bat);
 						objects.el.appendChild(obj);
 						objects.el.appendChild(objects.create(template.empty));
@@ -439,7 +449,7 @@ var objects = {
 						enemy.resolution.push(true);
 						break;
 					case id.enemy.fish:
-						var obj = objects.create(template.enemy.default);
+						obj = objects.create(template.enemy.default);
 						obj.classList.add(template.enemy.fish);
 						objects.el.appendChild(obj);
 						objects.el.appendChild(objects.create(template.empty));
@@ -457,17 +467,17 @@ var objects = {
 						objects.el.appendChild(objects.create(template.finish));
 						break;
 					case id.wall.surface:
-						var obj = objects.create(template.wall.default);
+						obj = objects.create(template.wall.default);
 						obj.classList.add(template.wall.surface);
 						objects.el.appendChild(obj);
 						break;
 					case id.wall.stone:
-						var obj = objects.create(template.wall.default);
+						obj = objects.create(template.wall.default);
 						obj.classList.add(template.wall.stone);
 						objects.el.appendChild(obj);
 						break;
 					case id.wall.box:
-						var obj = objects.create(template.wall.default);
+						obj = objects.create(template.wall.default);
 						obj.classList.add(template.wall.box);
 						objects.el.appendChild(obj);
 						break;
@@ -475,57 +485,57 @@ var objects = {
 						objects.el.appendChild(objects.create(template.water.default));
 						break;
 					case id.water.surface:
-						var obj = objects.create(template.water.default);
+						obj = objects.create(template.water.default);
 						obj.classList.add(template.water.surface);
 						objects.el.appendChild(obj);
 						break;
 					case id.keys.blue:
-						var obj = objects.create(template.keys.default)
+						obj = objects.create(template.keys.default)
 						obj.classList.add(template.keys.default + "-" + template.keys.blue);
 						obj.setAttribute("data-" + template.keys.default, template.keys.blue);
 						objects.el.appendChild(obj);
 						break;
 					case id.keys.yellow:
-						var obj = objects.create(template.keys.default)
+						obj = objects.create(template.keys.default)
 						obj.classList.add(template.keys.default + "-" + template.keys.yellow);
 						obj.setAttribute("data-" + template.keys.default, template.keys.yellow);
 						objects.el.appendChild(obj);
 						break;
 					case id.keys.green:
-						var obj = objects.create(template.keys.default)
+						obj = objects.create(template.keys.default)
 						obj.classList.add(template.keys.default + "-" + template.keys.green);
 						obj.setAttribute("data-" + template.keys.default, template.keys.green);
 						objects.el.appendChild(obj);
 						break;
 					case id.keys.red:
-						var obj = objects.create(template.keys.default)
+						obj = objects.create(template.keys.default)
 						obj.classList.add(template.keys.default + "-" + template.keys.red);
 						obj.setAttribute("data-" + template.keys.default, template.keys.red);
 						objects.el.appendChild(obj);
 						break;
 					case id.locks.blue:
-						var obj = objects.create(template.locks.default)
+						obj = objects.create(template.locks.default)
 						obj.classList.add(template.locks.default + "-" + template.locks.blue);
 						obj.classList.add(template.wall.default);
 						obj.setAttribute("data-" + template.locks.default, template.locks.blue);
 						objects.el.appendChild(obj);
 						break;
 					case id.locks.yellow:
-						var obj = objects.create(template.locks.default)
+						obj = objects.create(template.locks.default)
 						obj.classList.add(template.locks.default + "-" + template.locks.yellow);
 						obj.classList.add(template.wall.default);
 						obj.setAttribute("data-" + template.locks.default, template.locks.yellow);
 						objects.el.appendChild(obj);
 						break;
 					case id.locks.green:
-						var obj = objects.create(template.locks.default)
+						obj = objects.create(template.locks.default)
 						obj.classList.add(template.locks.default + "-" + template.locks.green);
 						obj.classList.add(template.wall.default);
 						obj.setAttribute("data-" + template.locks.default, template.locks.green);
 						objects.el.appendChild(obj);
 						break;
 					case id.locks.red:
-						var obj = objects.create(template.locks.default)
+						obj = objects.create(template.locks.default)
 						obj.classList.add(template.locks.default + "-" + template.locks.red);
 						obj.classList.add(template.wall.default);
 						obj.setAttribute("data-" + template.locks.default, template.locks.red);
@@ -540,7 +550,7 @@ var objects = {
 		money = doc.querySelectorAll(".money");
 		needles = doc.querySelectorAll(".needles");
 		keys = doc.querySelectorAll(".key");
-		locks = doc.querySelectorAll(".lock");
+		locks.el = doc.querySelectorAll(".lock");
 		player.el = doc.querySelector(".player");
 		finish = doc.querySelectorAll(".finish");
 		enemy.el = doc.querySelectorAll(".enemy");
@@ -563,12 +573,12 @@ var game = {
 				break;
 			case buttons.left:
 				world.move("left");
-				player.el.classList.remove("left")
+				player.el.classList.remove("left");
 				player.el.classList.add("right");
 				break;
 			case buttons.right:
 				world.move("right");
-				player.el.classList.remove("right")
+				player.el.classList.remove("right");
 				player.el.classList.add("left");
 				break;
 		};
@@ -588,6 +598,7 @@ var game = {
 		this.init();
 	},
 	init: function() {
+		NodeList.prototype.each = [].forEach;
 		objects.places("objects");
 		objects.places("enemies");
 		objects.find();
