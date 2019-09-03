@@ -20,10 +20,7 @@ body {
 }
 
 .field {
-	//width: 500px;
 	height: 500px;
-	border: 1px solid;
-	margin: 50px auto;
 	position: relative;
 	overflow: hidden;
 }
