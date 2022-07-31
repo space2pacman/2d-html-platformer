@@ -1,1 +1,1 @@
-[play demo](https://space2pacman.github.io/pacman-game-maker/game.html)
+[play demo](https://space2pacman.github.io/2d-html-platformer/game.html)
